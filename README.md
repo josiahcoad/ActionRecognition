@@ -4,7 +4,7 @@ Action recognition semester project for Advanced Topics in Deep Learning: CSCE 6
 ### How to run demo
 
 - `>>> cd demo`
-- `>>> pip install -r requirements`
+- `>>> pip install -r requirements.txt`
 - `>>> python demo.py` or `>>> python demo.py --vidpath ./videos/myvid.mp4`
 
 ![demo gif](./demo/results/demo.gif)
