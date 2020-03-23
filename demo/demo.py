@@ -190,7 +190,7 @@ def video_to_imgs(vidpath, imgpath):
         if not ret:
             break
 
-        if curr_ts - last_ts > .3:  # only sample about 3 fps
+        if curr_ts - last_ts > .3:  # only sample  ~3 fps
             last_ts = curr_ts
             # save image of the current frame in jpg file
             name = '{}_{:5f}.jpg'.format(os.path.join(
