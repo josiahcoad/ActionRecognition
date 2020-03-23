@@ -250,7 +250,7 @@ def annotate_img(imgpath, prob):
     d = ImageDraw.Draw(txt)
 
     # draw text, full opacity
-    d.text((10, 60), 'Shouting Prob: {:.2f}'.format(
+    d.text((10, 60), '{:.2f}'.format(
         prob), font=fnt, fill=(255, 0, 0, 255))
 
     return Image.alpha_composite(base, txt)
