@@ -12,3 +12,5 @@ Action recognition semester project for Advanced Topics in Deep Learning: CSCE 6
 ![demo graph](./demo/results/demo.png)
 
 See example of running demo [here](https://www.youtube.com/watch?v=KtfCgkhptbI).
+
+You can see the full report [here](689 Report 1.pdf)
