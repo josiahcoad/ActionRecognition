@@ -3,6 +3,9 @@ Action recognition semester project for Advanced Topics in Deep Learning: CSCE 6
 
 ### How to run demo
 
+Running the demo requires PyAV
+- `>>> brew install ffmpeg pkg-config` or `>>> conda install av -c conda-forge`
+or if you need some other way to install: [installation instructions](https://docs.mikeboers.com/pyav/develop/overview/installation.html)
 - `>>> cd demo`
 - `>>> pip install -r requirements.txt`
 - `>>> python demo.py` or `>>> python demo.py --vidpath ./videos/myvid.mp4`
