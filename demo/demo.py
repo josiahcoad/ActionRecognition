@@ -12,7 +12,7 @@ import os
 import json
 import argparse
 
-from .utils import *
+from utils import *
 
 # Load Model
 # Load face detector
@@ -61,6 +61,15 @@ def mk_json(predictions, title, outfolder):
     with open(os.path.join(outfolder, title + '.json'), 'w') as f:
         f.write(json.dumps(data))
 
+def labelvid(vidpath, resultspath):
+    facelist, frames, timestamps = detection_pipeline(vidpath)
+    print("Video processed")
+    probs = [0 if faces is None else get_frame_prob(faces) for faces in facelist]
+    print("Predictions done")
+    title = get_basename(vidpath)
+    show_frames(frames, probs, outfolder=resultspath, title=title)
+    show_timestamps(probs, timestamps, outfolder=resultspath, title=title)
+    mk_json(zip(timestamps, probs), title, resultspath)
 
 # get vidpath, resultspath from command line if provided, else default
 def parseargs():
