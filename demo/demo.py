@@ -62,26 +62,6 @@ def mk_json(predictions, title, outfolder):
         f.write(json.dumps(data))
 
 
-# get prediction results for video
-def labelvid(vidpath, resultspath):
-    # Use model to predict for each image in seqence
-    assert os.path.exists(vidpath), f'{vidpath} does not exist'
-    video, _, data = torchvision.io.read_video(vidpath, pts_unit='sec')
-    orig_fps = data['video_fps']
-    dest_fps = 3
-    spf = 1 / dest_fps
-    print(f'video read ({len(video)} frames)')
-    video = downsample(video, orig_fps, dest_fps)
-    print(f'video downsampled ({len(video)} frames)')
-    probs = predict(video)
-    predictions = np.array([(i * spf, p) for i, p in enumerate(probs)])
-    print('predictions finished')
-    # Create results
-    vidname = get_basename(vidpath)
-    mk_prob_graph(predictions, vidname, resultspath)
-    mk_json(predictions, vidname, resultspath)
-
-
 # get vidpath, resultspath from command line if provided, else default
 def parseargs():
     parser = argparse.ArgumentParser(
