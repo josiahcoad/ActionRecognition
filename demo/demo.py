@@ -12,14 +12,14 @@ import os
 import json
 import argparse
 
+from .utils import *
+
 # Load Model
-model = models.resnet18()
-num_ftrs = model.fc.in_features
-model.fc = nn.Linear(num_ftrs, 2)
+# Load face detector
+mtcnn = MTCNN(margin=14, keep_all=True, factor=0.5, device=device).eval()
 
-checkpoint = torch.load('./assets/model.pth', map_location=torch.device('cpu'))
-model.load_state_dict(checkpoint['state_dict'])
-
+# Load facial recognition model
+resnet = InceptionResnetV1(pretrained='vggface2', device=device).eval()
 
 # 'My Drive/CCSE 689/images/myimg.png' -> myimg
 def get_basename(path):
@@ -62,26 +62,6 @@ def mk_json(predictions, title, outfolder):
         f.write(json.dumps(data))
 
 
-# make gif with predictions
-def mk_gif(predictions, frames, spf, title, outfolder):
-    fig = plt.figure(figsize=(13, 10))
-    ims = []
-    for img, (_, prob) in zip(frames, predictions):
-        im = plt.imshow(img, animated=True)
-        plt.axis('off')
-        t = plt.text(100, 100, round(prob, 2), color='red', fontsize=20)
-        ims.append([im, t])
-    anim = animation.ArtistAnimation(fig, ims, interval=spf*1000, blit=True)
-    anim.save(os.path.join(outfolder, title + '.mp4'))
-    plt.close()
-
-
-def downsample(vid, orig_fps, dest_fps):
-    assert orig_fps >= dest_fps
-    skip = orig_fps // dest_fps
-    return torch.stack([frame for i, frame in enumerate(vid) if i % skip == 0])
-
-
 # get prediction results for video
 def labelvid(vidpath, resultspath):
     # Use model to predict for each image in seqence
@@ -100,7 +80,6 @@ def labelvid(vidpath, resultspath):
     vidname = get_basename(vidpath)
     mk_prob_graph(predictions, vidname, resultspath)
     mk_json(predictions, vidname, resultspath)
-    mk_gif(predictions, video, spf, vidname, resultspath)
 
 
 # get vidpath, resultspath from command line if provided, else default
