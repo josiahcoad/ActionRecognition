@@ -67,7 +67,7 @@ def labelvid(vidpath, resultspath):
     probs = [0 if faces is None else get_frame_prob(faces) for faces in facelist]
     print("Predictions done")
     title = get_basename(vidpath)
-    show_frames(frames, probs, outfolder=resultspath, title=title)
+    show_frames(frames, probs, 5, outfolder=resultspath, title=title)
     show_timestamps(probs, timestamps, outfolder=resultspath, title=title)
     mk_json(zip(timestamps, probs), title, resultspath)
 
