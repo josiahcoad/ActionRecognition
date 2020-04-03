@@ -17,3 +17,5 @@ or if you need some other way to install: [installation instructions](https://do
 You can see the full report [here](https://github.com/josiahcoad/ActionRecognition/blob/master/689%20Report%201.pdf)
 
 See example of running demo [here](https://youtu.be/Yi-h_lC-KSg).
+
+The trained *model.pth* file is [here](https://github.com/josiahcoad/ActionRecognition/blob/master/demo/assets/model.pth)
