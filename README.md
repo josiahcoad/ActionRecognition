@@ -1,6 +1,8 @@
 # ActionRecognition
 Action recognition semester project for Advanced Topics in Deep Learning: CSCE 689
 
+The goal is a binary classifier to predict if a person is shouting.
+
 ### How to run demo
 
 - `>>> cd demo`
