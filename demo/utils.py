@@ -140,6 +140,7 @@ def show_timestamps(probs, timestamps, outfolder, title):
   path = os.path.join(outfolder, title + '.png')
   print('Timestamps being saved at ' + path)
   plt.savefig(path)
+  plt.close()
 
 
 def show_frames(frames, probs, nskip=1, outfolder=None, title=None):
@@ -158,6 +159,7 @@ def show_frames(frames, probs, nskip=1, outfolder=None, title=None):
   path = os.path.join(outfolder, title + '_frames.png')
   print('Frames being saved at ' + path)
   plt.savefig(path)
+  plt.close()
 
 
 def get_frame_prob(faces):
