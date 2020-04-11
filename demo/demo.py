@@ -6,7 +6,7 @@ import os
 
 def main(vidpath, resultspath):
     model = keras.models.load_model('assets/model.h5')
-    frames, points, ppoints, ts = load_vid(vidpath, 10)
+    frames, points, ppoints, ts = load_vid(vidpath, 5)
     probs = get_vid_probs(model, ppoints)
     leveled_probs = level_vid_probs(probs, 3, 1)
     title = get_basename(vidpath)
