@@ -1,18 +1,18 @@
-from utils import get_frame_probs, get_fps, mk_pred_plot, mk_pred_json
+from utils import *
 from tensorflow import keras
 import numpy as np
-
-
+import argparse
+import os
 
 def main(vidpath, resultspath):
-    model = keras.models.load_model('models/keras_ffn_personal.h5')
-    probs = get_frame_probs('openpose_json/personal/shout/1/*', model)
-    fps = get_fps(vidpath)
-    ts = fps * np.arange(len(probs))
-    predictions = np.hstack(ts, probs)
+    model = keras.models.load_model('assets/model.h5')
+    frames, points, ppoints, ts = load_vid(vidpath, 10)
+    probs = get_vid_probs(ppoints)
     title = get_basename(vidpath)
-    mk_pred_plot(predictions, resultspath, title)
-    mk_pred_json(predictions, resultspath, title)
+    tssavepath = os.path.join(resultspath, title + '_ts.png')
+    fsavepath = os.path.join(resultspath, title + '_frames.png')
+    tsplot(ts, level_vid_probs(probs, 3, 1), tssavepath)
+    show_frames(probs, points, frames, fsavepath)
 
 
 
@@ -36,4 +36,6 @@ if __name__ == '__main__':
     parser.add_argument(
         '--resultspath', help='The path to a folder to store the results of analysis.')
     vidpath, resultspath = parseargs()
+    assert os.path.exists(vidpath), 'Video path does not exist'
+    assert os.path.exists(resultspath), 'Results path does not exist'
     main(vidpath, resultspath)

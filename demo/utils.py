@@ -7,94 +7,119 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-# 'My Drive/CCSE 689/images/myimg.png' -> myimg
-def get_basename(path):
-    base = os.path.basename(path)
-    name, _ = os.path.splitext(base)
-    return name
-
-
-def get_fps(path):
-    return cv2.VideoCapture(path).get(cv2.CAP_PROP_FPS)
-
-
 def vid2frames(path):
-    # returns: [(W,H,C), ...]
+    # returns: shape(F,W,H,C)
     cap = cv2.VideoCapture(path)
     frames = []
     while(cap.isOpened()):
         ret, frame = cap.read()
         if ret == False:
             break
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         frames.append(frame)
     cap.release()
     cv2.destroyAllWindows()
-    return frames
+    return np.array(frames)
 
 
-def show_frames(frames, probs, nskip=1, outfolder=None, title=None):
-    print(
-        f'Probability video is shouting: {round(np.mean([p for p in probs if p]), 2)}')
-    numimgs = len(frames)
-    ncols = 10
-    nrows = np.ceil(numimgs/(ncols * nskip))
-    plt.figure(figsize=(ncols, nrows))
-    for i, (frame, prob) in enumerate(zip(frames[0:numimgs:nskip], probs[0:numimgs:nskip])):
-        plt.subplot(nrows, ncols, i+1)
-        plt.title(f'{round(prob, 2)}')
-        plt.imshow(frame)
-        plt.axis('off')
-    plt.tight_layout()
-    path = os.path.join(outfolder, title + '_frames.png')
-    print('Frames being saved at ' + path)
-    plt.savefig(path)
-    plt.close()
+def get_fps(path):
+    # returns: shape(F,68,2)
+    return cv2.VideoCapture(path).get(cv2.CAP_PROP_FPS)
 
 
-def intermix(lst1, lst2):
-    return np.array([[i, j] for i, j in zip(lst1, lst2)]).ravel()
+def flatten_faces(faces):
+    # (F, 62, 2) -> (F, 136)
+    return faces.reshape(-1, 136)
+
+
+def isface(face):
+    # face: any shape
+    return not (np.isnan(face).any() or face.sum() == 0)
 
 
 def scale01(x):
-    return (x - np.min(x)) / (np.max(x) - np.min(x))
+    # x: shape(F, 136) or shape(F, 68, 2)
+    return ((x - np.min(x, 1, keepdims=True)) /
+            (np.max(x, 1, keepdims=True) - np.min(x, 1, keepdims=True)))
 
 
-def get_scaled_points(face):
-    x, y, c = np.array(np.split(face, 70)).T
-    if np.mean(c) > 0.2 and (min(x) == 0 or max(x) == 0 or min(y) == 0 or max(y) == 0):
-        show_face(intermix(x, y))
-    return intermix(scale01(x), scale01(y)) if np.mean(c) > 0.2 else None
+def frames2points(frames):
+    return np.array([extract_face_landmarks(frame) for frame in frames])
 
 
-def get_frame_probs(path, clf):
-    files = glob.glob(path)
-    faceframes = []
-    for i, name in enumerate(files):
-        with open(name) as file:
-            js = json.loads(file.read())
-            if len(js['people']) > 0:
-                faceframes.append(js['people'][0]['face_keypoints_2d'])
-            else:
-                faceframes.append(None)
-    faceframes = [None if frame is None else get_scaled_points(
-        np.array(frame)) for frame in faceframes]
-
-    def pred(x): return clf.predict(x.reshape(1, -1)).T[1][0]
-    probs = [np.NaN if frame is None else pred(frame) for frame in faceframes]
-    return probs
+def show_face(face):
+    x, y = np.array(np.split(face, 68)).T
+    y = 1 - y  # flip
+    fig, ax = plt.subplots()
+    ax.scatter(x, y)
+    for i in range(len(x)):
+        ax.annotate(i, (x[i], y[i]))
+    plt.show()
 
 
-### --------- OUTPUTS ---------- ###
+def load_folder(path, skip=1):
+    files = glob.glob(os.path.join(path, '*'))
+    vids = []
+    for f in files:
+        print(f)
+        frames = vid2frames(f)
+        vids.append(frames2points(frames[::skip]))
+    return np.concatenate(vids)
 
-def mk_pred_plot(predictions, outfolder, title):
-    plt.plot(*predictions.T)
-    plt.ylim(-0.1, 1.1)
-    path = os.path.join(outfolder, title + '.png')
-    print('Timestamps being saved at ' + path)
-    plt.savefig(path)
-    plt.close()
+
+def preprocess(points):
+    # frames: shape(F, 68, 2)
+    points = scale01(points)
+    return flatten_faces(points)
 
 
-def mk_pred_json(predictions, outfolder, title):
-    with open(os.path.join(outfolder, title + '.json'), 'w') as f:
-        f.write(json.dumps({'shouting': predictions}))
+def tsplot(ts, probs, savepath):
+    plt.plot(ts, probs)
+    plt.hlines(np.nanmean(probs), *plt.xlim(), color='red', alpha=.3)
+    plt.annotate(round(np.nanmean(probs), 2), (0, np.nanmean(probs)))
+    plt.ylim(-.1, 1.1)
+    plt.savefig(savepath)
+
+
+def singlepred(x):
+    return model.predict(x.reshape(1, -1))[0][1]
+
+
+def level_vid_probs(probs, nffill=2, nroll=3):
+    # fillna foward {nffill}, then fill remaining na with 0, then get {nroll} rolling avg
+    return pd.Series(probs).fillna(method='ffill', limit=nffill).fillna(0).ewm(span=nroll).mean()
+
+
+def get_vid_probs(points):
+    return [singlepred(face) if isface(face) else np.NaN for face in points]
+
+
+def load_vid(path, skip=1):
+    frames = vid2frames(path)[::skip]
+    points = frames2points(frames)
+    ppoints = preprocess(points)
+    fps = get_fps(path)
+    ts = np.arange(len(points)) * skip / fps
+    return frames, points, ppoints, ts
+
+
+def show_frames(probs, points, frames, savepath, nskip=1):
+    # probs: shape(F)
+    # points: shape(F, 68, 2)
+    # frames: shape(F, W, H, 3)
+    numimgs = len(test_frames)
+    ncols = 10
+    nrows = np.ceil(numimgs / (ncols * nskip))
+    plt.figure(figsize=(ncols*2, nrows*2))
+
+    ls = np.array(list(zip(probs, points, frames)))[::nskip]
+    for i, (prob, points, frame) in enumerate(ls):
+        plt.subplot(nrows, ncols, i+1)
+        plt.imshow(frame)
+        if isface(points):
+            plt.scatter(*points.T, s=2)
+            plt.title(round(prob, 2))
+            # plt.annotate(round(prob, 2), (100, 100), c='red', fontsize=15)
+        plt.axis('off')
+    plt.tight_layout()
+    plt.savefig(savepath)
