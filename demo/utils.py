@@ -5,6 +5,16 @@ import glob
 import json
 import numpy as np
 import matplotlib.pyplot as plt
+import pandas as pd
+import warnings
+warnings.filterwarnings("ignore")
+
+
+def get_basename(path):
+    # 'My Drive/CCSE 689/images/myimg.png' -> myimg
+    base = os.path.basename(path)
+    name, _ = os.path.splitext(base)
+    return name
 
 
 def vid2frames(path):
@@ -81,7 +91,7 @@ def tsplot(ts, probs, savepath):
     plt.savefig(savepath)
 
 
-def singlepred(x):
+def singlepred(model, x):
     return model.predict(x.reshape(1, -1))[0][1]
 
 
@@ -90,8 +100,8 @@ def level_vid_probs(probs, nffill=2, nroll=3):
     return pd.Series(probs).fillna(method='ffill', limit=nffill).fillna(0).ewm(span=nroll).mean()
 
 
-def get_vid_probs(points):
-    return [singlepred(face) if isface(face) else np.NaN for face in points]
+def get_vid_probs(model, points):
+    return [singlepred(model, face) if isface(face) else np.NaN for face in points]
 
 
 def load_vid(path, skip=1):
@@ -107,7 +117,7 @@ def show_frames(probs, points, frames, savepath, nskip=1):
     # probs: shape(F)
     # points: shape(F, 68, 2)
     # frames: shape(F, W, H, 3)
-    numimgs = len(test_frames)
+    numimgs = len(frames)
     ncols = 10
     nrows = np.ceil(numimgs / (ncols * nskip))
     plt.figure(figsize=(ncols*2, nrows*2))

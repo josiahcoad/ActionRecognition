@@ -7,7 +7,7 @@ import os
 def main(vidpath, resultspath):
     model = keras.models.load_model('assets/model.h5')
     frames, points, ppoints, ts = load_vid(vidpath, 10)
-    probs = get_vid_probs(ppoints)
+    probs = get_vid_probs(model, ppoints)
     title = get_basename(vidpath)
     tssavepath = os.path.join(resultspath, title + '_ts.png')
     fsavepath = os.path.join(resultspath, title + '_frames.png')
