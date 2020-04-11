@@ -13,7 +13,7 @@ The goal is a binary classifier to predict if a person is shouting.
 
 ![demo graph](./demo/results/demo.png)
 
-You can see the full report [here](https://github.com/josiahcoad/ActionRecognition/blob/master/689%20Report%201.pdf)
+You can see the full report [here](https://github.com/josiahcoad/ActionRecognition/blob/master/689%20Report%202.pdf)
 
 See example of running demo [here](https://youtu.be/Yi-h_lC-KSg).
 
