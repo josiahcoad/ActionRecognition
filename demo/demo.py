@@ -8,11 +8,12 @@ def main(vidpath, resultspath):
     model = keras.models.load_model('assets/model.h5')
     frames, points, ppoints, ts = load_vid(vidpath, 10)
     probs = get_vid_probs(model, ppoints)
+    leveled_probs = level_vid_probs(probs, 3, 1)
     title = get_basename(vidpath)
     savepath = os.path.join(resultspath, title)
-    tsplot(ts, level_vid_probs(probs, 3, 1), savepath + '.png')
+    tsplot(ts, leveled_probs, savepath + '.png')
     show_frames(probs, points, frames, savepath + '_frames.png')
-    tsjson(ts, probs, savepath + '.json')
+    tsjson(ts, leveled_probs, savepath + '.json')
 
 
 

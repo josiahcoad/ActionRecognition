@@ -82,8 +82,9 @@ def tsplot(ts, probs, savepath):
 
 
 def tsjson(ts, probs, savepath):
+    data = np.vstack([ts, probs]).T.astype(float).round(3).tolist()
     with open(savepath, 'w') as f:
-        f.write(json.dumps({'shouting': np.vstack([ts, probs]).tolist()}))
+        f.write(json.dumps({'shouting': data}))
 
 
 def singlepred(model, x):
@@ -96,7 +97,7 @@ def level_vid_probs(probs, nffill=2, nroll=3):
 
 
 def get_vid_probs(model, points):
-    return [singlepred(model, face) if isface(face) else np.NaN for face in points]
+    return np.array([singlepred(model, face) if isface(face) else np.nan for face in points])
 
 
 def load_vid(path, skip=1):
