@@ -57,16 +57,6 @@ def frames2points(frames):
     return np.array([extract_face_landmarks(frame) for frame in frames])
 
 
-def show_face(face):
-    x, y = np.array(np.split(face, 68)).T
-    y = 1 - y  # flip
-    fig, ax = plt.subplots()
-    ax.scatter(x, y)
-    for i in range(len(x)):
-        ax.annotate(i, (x[i], y[i]))
-    plt.show()
-
-
 def load_folder(path, skip=1):
     files = glob.glob(os.path.join(path, '*'))
     vids = []
@@ -89,6 +79,11 @@ def tsplot(ts, probs, savepath):
     plt.annotate(round(np.nanmean(probs), 2), (0, np.nanmean(probs)))
     plt.ylim(-.1, 1.1)
     plt.savefig(savepath)
+
+
+def tsjson(ts, probs, savepath):
+    with open(savepath, 'w') as f:
+        f.write(json.dumps({'shouting': np.vstack([ts, probs])}))
 
 
 def singlepred(model, x):
