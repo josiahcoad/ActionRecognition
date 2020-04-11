@@ -83,7 +83,7 @@ def tsplot(ts, probs, savepath):
 
 def tsjson(ts, probs, savepath):
     with open(savepath, 'w') as f:
-        f.write(json.dumps({'shouting': np.vstack([ts, probs])}))
+        f.write(json.dumps({'shouting': np.vstack([ts, probs]).tolist()}))
 
 
 def singlepred(model, x):

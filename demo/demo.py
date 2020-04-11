@@ -9,10 +9,10 @@ def main(vidpath, resultspath):
     frames, points, ppoints, ts = load_vid(vidpath, 10)
     probs = get_vid_probs(model, ppoints)
     title = get_basename(vidpath)
-    tssavepath = os.path.join(resultspath, title + '_ts.png')
-    fsavepath = os.path.join(resultspath, title + '_frames.png')
-    tsplot(ts, level_vid_probs(probs, 3, 1), tssavepath)
-    show_frames(probs, points, frames, fsavepath)
+    savepath = os.path.join(resultspath, title)
+    tsplot(ts, level_vid_probs(probs, 3, 1), savepath + '.png')
+    show_frames(probs, points, frames, savepath + '_frames.png')
+    tsjson(ts, probs, savepath + '.json')
 
 
 
