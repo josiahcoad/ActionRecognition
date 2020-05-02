@@ -4,8 +4,11 @@ import numpy as np
 import argparse
 import os
 
+from joblib import dump, load
+
 def main(vidpath, resultspath):
     model = keras.models.load_model('assets/model.h5')
+    # model = load('assets/svm_personal_acc80.joblib')
     frames, points, ppoints, ts = load_vid(vidpath, 5)
     probs = get_vid_probs(model, ppoints)
     leveled_probs = level_vid_probs(probs, 3, 1)
