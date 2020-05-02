@@ -2,7 +2,7 @@ import cv2
 from PIL import Image
 import numpy as np
 import os
-from keras.applications.vgg19 import VGG19, preprocess_input as preprocess_input19
+from tensorflow.keras.applications.vgg19 import VGG19, preprocess_input as preprocess_input19
 from facenet_pytorch import MTCNN
 
 
@@ -102,7 +102,7 @@ def singlepred(model, x):
 
 
 def get_face_probs(model, faces):
-    return np.array([np.nan if face is None else singlepred(model, face) for face in faces])
+    return np.array([None if face is None else singlepred(model, face) for face in faces])
 
 
 def load_video_frames(path, skip=1):

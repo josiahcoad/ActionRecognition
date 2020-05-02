@@ -1,8 +1,9 @@
-from keras.applications.vgg19 import VGG19, preprocess_input
-from keras.models import Model
+from tensorflow.keras.applications.vgg19 import VGG19, preprocess_input
+from tensorflow.keras.models import Model
 import cv2
 import librosa
 import numpy as np
+import warnings
 
 base_model = VGG19(weights='imagenet')
 model = Model(inputs=base_model.input,
@@ -26,7 +27,9 @@ def split_overlapping(a, size, step):
 
 
 def get_audio_probs(clf, filename):
-    y, sr = librosa.load(filename)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        y, sr = librosa.load(filename)
     test = []
     times = []
     step = sr  # full second step

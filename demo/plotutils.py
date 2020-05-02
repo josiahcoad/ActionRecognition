@@ -25,7 +25,7 @@ def tsjson(ts, probs, savepath):
         f.write(json.dumps({'shouting': data}))
 
 
-def level_vid_probs(probs, nffill=2, nroll=3):
+def smooth_probs(probs, nffill=2, nroll=3):
     # fillna foward {nffill}, then fill remaining na with 0, then get {nroll} rolling avg
     return pd.Series(probs).fillna(method='ffill', limit=nffill).fillna(0).ewm(span=nroll).mean()
 
