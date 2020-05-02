@@ -1,23 +1,42 @@
-from utils import *
+from plotutils import *
+from vidutils import load_video_frames, get_face_probs
+# from audioutils import get_audio_probs
 from tensorflow import keras
+import joblib
 import numpy as np
 import argparse
 import os
 
-from joblib import dump, load
+
+def get_matching_aud_prob(ts, aud_probs):
+    for key in aud_probs:
+        if ts > key:
+            return aud_probs[key]
+
+
+def get_vid_probs(aud_probs, frame_probs, timestamps, theta=.5):
+    vid_probs = []
+    for ts, face_prob in zip(timestamps, face_probs):
+        aud_prob = get_current_aud_prob(ts, aud_probs)
+        if face_prob:
+            vid_probs.append(theta * face_prob + (1-theta) * aud_prob)
+        vid_probs.append(aud_prob)
+    return aud_prob
+
 
 def main(vidpath, resultspath):
-    model = keras.models.load_model('assets/model.h5')
-    # model = load('assets/svm_personal_acc80.joblib')
-    frames, points, ppoints, ts = load_vid(vidpath, 5)
-    probs = get_vid_probs(model, ppoints)
-    leveled_probs = level_vid_probs(probs, 3, 1)
+    vmodel = keras.models.load_model('assets/keras_vgg19_84acc.h5')
+    amodel = joblib.load('assets/audio_mlp_classifier.joblib')
+    frames, faces, timestamps = load_video_frames(vidpath, skip=10)
+    face_probs = get_face_probs(vmodel, faces)
+    aud_probs = get_audio_probs(amodel, vidpath)
+    probs = get_vid_probs(face_probs, aud_probs)  # [.2, .3, ...]
+    leveled_probs = level_vid_probs(face_probs, 3, 1)
     title = get_basename(vidpath)
     savepath = os.path.join(resultspath, title)
-    tsplot(ts, leveled_probs, savepath + '.png')
-    show_frames(probs, points, frames, savepath + '_frames.png')
-    tsjson(ts, leveled_probs, savepath + '.json')
-
+    tsplot(timestamps, leveled_probs, savepath + '.png')
+    show_frames(face_probs, frames, savepath + '_frames.png')
+    tsjson(timestamps, leveled_probs, savepath + '.json')
 
 
 # get vidpath, resultspath from command line if provided, else default
