@@ -1,6 +1,6 @@
 from plotutils import *
 from vidutils import load_video_frames, get_face_probs
-# from audioutils import get_audio_probs
+from audioutils import get_audio_probs
 from tensorflow import keras
 import joblib
 import numpy as np
@@ -8,13 +8,13 @@ import argparse
 import os
 
 
-def get_matching_aud_prob(ts, aud_probs):
+def get_current_aud_prob(ts, aud_probs):
     for key in aud_probs:
         if ts > key:
             return aud_probs[key]
 
 
-def get_vid_probs(aud_probs, frame_probs, timestamps, theta=.5):
+def get_vid_probs(aud_probs, face_probs, timestamps, theta=.5):
     vid_probs = []
     for ts, face_prob in zip(timestamps, face_probs):
         aud_prob = get_current_aud_prob(ts, aud_probs)
@@ -30,7 +30,7 @@ def main(vidpath, resultspath):
     frames, faces, timestamps = load_video_frames(vidpath, skip=10)
     face_probs = get_face_probs(vmodel, faces)
     aud_probs = get_audio_probs(amodel, vidpath)
-    probs = get_vid_probs(face_probs, aud_probs)  # [.2, .3, ...]
+    probs = get_vid_probs(aud_probs, face_probs, timestamps)  # [.2, .3, ...]
     leveled_probs = level_vid_probs(face_probs, 3, 1)
     title = get_basename(vidpath)
     savepath = os.path.join(resultspath, title)

@@ -1,5 +1,8 @@
 from keras.applications.vgg19 import VGG19, preprocess_input
+from keras.models import Model
+import cv2
 import librosa
+import numpy as np
 
 base_model = VGG19(weights='imagenet')
 model = Model(inputs=base_model.input,
