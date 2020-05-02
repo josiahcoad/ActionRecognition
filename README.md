@@ -10,10 +10,6 @@ The goal is a binary classifier to predict if a person is shouting.
 - `>>> python demo.py` or `>>> python demo.py --vidpath ./videos/myvid.mp4`
 
 ### Example Results
-![demo gif](./demo/results/demo_frames.png)
-
-![demo graph](./demo/results/demo.png)
-
 You can see the full report [here](https://github.com/josiahcoad/ActionRecognition/blob/master/689%20Report%203.pdf)
 
 See example of running demo [here](https://youtu.be/Yi-h_lC-KSg).
