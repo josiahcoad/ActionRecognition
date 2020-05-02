@@ -12,6 +12,7 @@ def get_current_aud_prob(ts, aud_probs):
     for key in aud_probs:
         if ts > key:
             return aud_probs[key]
+    return aud_probs[key]
 
 
 def get_vid_probs(aud_probs, face_probs, timestamps, theta=.5):
