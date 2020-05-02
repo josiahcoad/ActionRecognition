@@ -26,7 +26,7 @@ def get_vid_probs(aud_probs, face_probs, timestamps, theta=.5):
     return vid_probs
 
 
-def main(vidpath, resultspath):
+def main(vidpath, resultspath, resultname):
     vmodel = keras.models.load_model('assets/keras_vgg19_84acc.h5')
     amodel = joblib.load('assets/audio_mlp_classifier.joblib')
     frames, faces, timestamps = load_video_frames(vidpath, skip=10)
@@ -37,8 +37,8 @@ def main(vidpath, resultspath):
     probs = get_vid_probs(aud_probs, face_probs, timestamps)  # [.2, .3, ...]
     leveled_probs = smooth_probs(probs, 3, 1)
     title = get_basename(vidpath)
-    savepath = os.path.join(resultspath, title)
-    tsplot(timestamps, probs, savepath + '.png')
+    savepath = os.path.join(resultspath, resultname or title)
+    tsplot(timestamps, probs, savepath + '.jpg')
     show_frames(probs, frames, savepath + '_frames.png')
     tsjson(timestamps, leveled_probs, savepath + '.json')
 
@@ -50,19 +50,18 @@ def parseargs():
     parser.add_argument('--vidpath', help='The path to an .mp4 file.')
     parser.add_argument(
         '--resultspath', help='The path to a folder to store the results of analysis.')
+    parser.add_argument(
+        '--resultname', help='The base name of the result files to be generated. If none, use vidname.')
     args = parser.parse_args()
     vidpath = args.vidpath or './videos/demo.mov'
     resultspath = args.resultspath or './results'
-    return vidpath, resultspath
+    resultname = args.resultname or None
+    return vidpath, resultspath, resultname
+    
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(
-        description='Demo for shouting action recognition in videos.')
-    parser.add_argument('--vidpath', help='The path to an .mp4 file.')
-    parser.add_argument(
-        '--resultspath', help='The path to a folder to store the results of analysis.')
-    vidpath, resultspath = parseargs()
+    vidpath, resultspath, resultname = parseargs()
     assert os.path.exists(vidpath), 'Video path does not exist'
     assert os.path.exists(resultspath), 'Results path does not exist'
-    main(vidpath, resultspath)
+    main(vidpath, resultspath, resultname)
